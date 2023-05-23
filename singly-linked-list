@@ -1,0 +1,396 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Element{
+
+    int val;
+    struct Element* next;
+
+}Element;
+
+/// make element
+Element* makeElement(int val){
+
+    Element* new_element = (Element*)malloc(sizeof(Element));
+    new_element->val = val;
+    new_element->next = NULL;
+
+    return new_element;
+}
+/// insert on front
+Element* insertOnFront(Element* head, Element* element){
+    if(head == NULL) return element;
+
+    element->next = head;
+    return element;
+
+}
+
+/// insert sort
+Element* insertSort(Element* head, Element* element){
+    if(head == NULL) return element;
+
+    if(head->val > element->val){
+        element->next = head;
+        return element;
+    }
+
+    Element* tmp = head;
+
+    while(tmp->next != NULL){
+        if(tmp->next->val > element->val){
+            Element* el = tmp->next;
+            tmp->next = element;
+            element->next = el;
+            return head;
+        }
+        tmp = tmp->next;
+    }
+    tmp->next = element;
+
+    return head;
+}
+
+/// insert on position
+Element* insertPosition(Element* head, Element* element, int pos){
+    if(pos < 0) return head;
+
+    if(pos == 0){
+        element->next = head;
+        return element;
+    }
+
+    Element* tmp = head;
+
+    while(tmp->next != NULL && pos > 1){
+        tmp = tmp->next;
+        pos--;
+    }
+    if(pos > 1){
+        tmp->next = element;
+    }
+    else{
+        Element* el = tmp->next;
+        tmp->next = element;
+        element->next = el;
+    }
+    return head;
+}
+
+/// insert on back
+Element* insertOnBack(Element* head, Element* element){
+
+    if(head == NULL) return element;
+
+    Element* tmp = head;
+
+    while(tmp->next != NULL)
+        tmp = tmp->next;
+
+    tmp->next = element;
+
+    return head;
+
+}
+
+/// print from front to back
+void printListIte(Element* head){
+
+    Element* tmp = head;
+
+    while(tmp != NULL){
+        printf("%d ", tmp->val);
+        tmp = tmp->next;
+    }
+}
+
+/// print from back to front
+void printListRec(Element* head){
+
+    if(head == NULL) return;
+
+    printListRec(head->next);
+    printf("%d ", head->val);
+
+}
+
+/// get element on position
+Element* getPosition(Element* head, int pos){
+
+    if(head == NULL || pos == 0) return head;
+
+    Element* tmp = head;
+
+    while(tmp->next != NULL && pos > 0){
+        tmp = tmp->next;
+        pos--;
+    }
+
+    return tmp;
+}
+
+/// list size
+int size(Element* head){
+    int size = 0;
+
+    if(head == NULL) return size;
+
+    Element* tmp = head;
+
+    while(tmp != NULL){
+        size++;
+        tmp=tmp->next;
+    }
+
+    return size;
+
+}
+
+/// size of sublist
+int sizeFromTo(Element* from, Element* to){
+
+    if(from == to) return 1;
+
+    int size = 0;
+    Element* tmp = from;
+
+    while(tmp->next != NULL && tmp != to){
+        size++;
+        tmp = tmp->next;
+    }
+    if(tmp != to)
+        return -1;
+    else
+        return size;
+
+}
+
+/// MERGE SORT
+
+Element* merge(Element* e1, Element* e2){
+
+    Element* tmp = makeElement(-1);
+    Element* headNew = tmp;
+
+    if(e1 == NULL) return e2;
+    if(e2 == NULL) return e1;
+
+    while(e1!=NULL && e2!=NULL){
+        if(e1->val <= e2->val){
+            tmp->next = e1;
+            e1 = e1->next;
+        }
+        else{
+            tmp->next = e2;
+            e2 = e2->next;
+        }
+        tmp = tmp->next;
+    }
+
+    while(e1!=NULL){
+        tmp->next = e1;
+        e1 = e1->next;
+        tmp = tmp->next;
+    }
+
+    while(e2!=NULL){
+        tmp->next = e2;
+        e2 = e2->next;
+        tmp = tmp->next;
+    }
+
+    return headNew->next;
+}
+
+Element* mergeSort(Element* head){
+
+    if(head == NULL) return head;
+
+    if(size(head)/2-1 < 0) return head;
+
+    Element* er = getPosition(head, size(head)/2-1);
+
+    Element* head2 = er->next;
+    er->next = NULL;
+
+    Element* headMerged = merge(mergeSort(head), mergeSort(head2));
+
+    return headMerged;
+
+}
+
+/// DELETION
+
+/// delete elements from front
+Element* deleteFront(Element* head){
+
+    if(head == NULL) return head;
+
+
+    Element* newHead = head->next;
+    free(head);
+    return newHead;
+
+}
+
+/// delete elements from back
+Element* deleteBack(Element* head){
+
+    if(head == NULL || head->next == NULL) return NULL;
+
+    Element* tmp = head;
+
+    while(tmp->next->next != NULL){
+        tmp = tmp->next;
+    }
+    free(tmp->next->next);
+    tmp->next = NULL;
+
+    return head;
+
+}
+
+/// delete element on position
+Element* deleteByPosition(Element* head, int pos){
+
+    if(head == NULL) return head;
+
+    Element* help;
+    if(pos == 0) {
+        help = head->next;
+        free(head);
+        return help;
+    }
+
+    Element* tmp = head;
+    while(tmp->next->next != NULL && pos > 1){
+        tmp = tmp->next;
+        pos--;
+    }
+    if(pos == 1){
+        help = tmp->next;
+        tmp->next = help->next;
+        free(help);
+    }
+    else{
+        free(tmp->next->next);
+        tmp->next = NULL;
+    }
+
+    return head;
+}
+
+/// delete all elements with given value
+Element* deleteByValue(Element* head, int val){
+
+    if(head == NULL) return head;
+
+    Element* help;
+    while(head->val == val){
+        help = head;
+        head = head->next;
+        free(help);
+    }
+
+    Element* tmp = head;
+
+    while(tmp->next != NULL){
+        if(tmp->next->val == val){
+           help = tmp->next;
+           tmp->next = help->next;
+           free(help);
+        }
+        else
+            tmp = tmp->next;
+    }
+
+    return head;
+}
+
+/// delete whole list
+Element* deleteList(Element* head){
+
+    while(head != NULL){
+        Element* help = head;
+        head = head->next;
+        free(help);
+    }
+
+    return head;
+
+}
+
+int main()
+{
+    Element* head = NULL;
+    Element* head2 = NULL; // sorted insert
+    Element* head3 = NULL;
+
+    head = insertOnFront(head, makeElement(5));
+    head = insertOnBack(head, makeElement(6));
+    head = insertOnBack(head, makeElement(4));
+    head = insertOnFront(head, makeElement(7));
+    head = insertPosition(head, makeElement(3), 3);
+
+    head2 = insertSort(head2, makeElement(5));
+    head2 = insertSort(head2, makeElement(6));
+    head2 = insertSort(head2, makeElement(4));
+    head2 = insertSort(head2, makeElement(7));
+    head2 = insertSort(head2, makeElement(3));
+
+    head3 = insertOnBack(head3, makeElement(4));
+    head3 = insertOnBack(head3, makeElement(4));
+    head3 = insertOnBack(head3, makeElement(3));
+    head3 = insertOnBack(head3, makeElement(4));
+    head3 = insertOnBack(head3, makeElement(4));
+    head3 = insertOnBack(head3, makeElement(5));
+    head3 = insertOnBack(head3, makeElement(4));
+    head3 = insertOnBack(head3, makeElement(6));
+    head3 = insertOnBack(head3, makeElement(4));
+
+    printf("LIST1\n");
+    printListIte(head);
+    printf("\nSize of list1:%d \n", size(head));
+    printf("LIST2\n");
+    printListIte(head2);
+
+    printf("\nSize of list2:%d \n", size(head2));
+    printf("Recursive print of list2:\n");
+    printListRec(head2);
+    printf("\n");
+
+    Element* tmp = getPosition(head, 3);
+    printf("%d\n", tmp->val);
+    printf("%d\n", sizeFromTo(getPosition(head, 2), getPosition(head, 4)));
+
+    head = mergeSort(head);
+    printListIte(head);
+    printf("\n");
+    head = deleteFront(head);
+    printListIte(head);
+    printf("\n");
+    head = deleteBack(head);
+    head = deleteBack(head);
+    head = deleteFront(head);
+    printListIte(head);
+    printf("\n");
+
+    head2 = deleteByPosition(head2, 2);
+    printListIte(head2);
+    printf("\n");
+
+    printf("LIST3:\n");
+    printListIte(head3);
+    printf("\n");
+    head3 = deleteByValue(head3, 4);
+    printf("list3 after deletion of elements with value 4:\n");
+    printListIte(head3);
+    printf("\n");
+
+    printf("Brisanje liste3:\n");
+    head3 = deleteList(head3);
+    printListIte(head3);
+    printf("\n");
+
+    return 0;
+}
